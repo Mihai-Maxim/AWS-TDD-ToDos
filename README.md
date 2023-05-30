@@ -4,7 +4,7 @@ Create a simple ToDoS API that supports all the CRUD operations.
 
 The API does not require any authentication.
 
-Build it with [SST](https://sst.dev/), use AWS DynamoDB.
+Build it with [SST](https://sst.dev/).
 
 ToDos should include: 
  *  Title
