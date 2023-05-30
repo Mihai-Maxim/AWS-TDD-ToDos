@@ -1,5 +1,5 @@
 import { ApiHandler } from "sst/node/api";
-import { Time } from "@todos/core/time";
+import { Time } from "../../core/src/time";
 
 export const handler = ApiHandler(async (_evt) => {
   return {

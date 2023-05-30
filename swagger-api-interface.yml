@@ -1,0 +1,174 @@
+swagger: '2.0'
+info:
+  title: ToDoS API
+  description: A simple ToDoS API supporting CRUD operations
+  version: 1.0.0
+basePath: /api
+schemes:
+  - http
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /todos:
+    get:
+      summary: Get all todos
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/ToDoGet'
+    post:
+      summary: Create a new todo
+      parameters:
+        - name: todo
+          in: body
+          description: ToDo object
+          required: true
+          schema:
+            $ref: '#/definitions/ToDoPost'
+      responses:
+        201:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ToDoGet'
+
+  /todos/{id}:
+    get:
+      summary: Get a todo by id
+      parameters:
+        - name: id
+          in: path
+          description: id of the todo
+          required: true
+          type: integer
+          format: int32
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ToDoGet'
+        404:
+          description: Todo not found
+
+    put:
+      summary: Update a todo by id
+      parameters:
+        - name: id
+          in: path
+          description: id of the todo
+          required: true
+          type: integer
+          format: int32
+        - name: todo
+          in: body
+          description: Updated ToDo object
+          required: true
+          schema:
+            $ref: '#/definitions/ToDoUpdate'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ToDoGet'
+        404:
+          description: Todo not found
+
+    delete:
+      summary: Delete a todo by id
+      parameters:
+        - name: id
+          in: path
+          description: id of the todo
+          required: true
+          type: integer
+          format: int32
+      responses:
+        204:
+          description: Successful operation
+        404:
+          description: Todo not found
+
+    patch:
+      summary: Update specific fields of a todo by id
+      parameters:
+        - name: id
+          in: path
+          description: id of the todo
+          required: true
+          type: integer
+          format: int32
+        - name: todo
+          in: body
+          description: Fields to be updated in the ToDo object
+          required: true
+          schema:
+            $ref: '#/definitions/ToDoPatch'
+      responses:
+        200:
+          description: Successful operation
+          schema:
+            $ref: '#/definitions/ToDoGet'
+        404:
+          description: Todo not found
+
+definitions:
+  ToDoGet:
+    type: object
+    required:
+      - id
+      - title
+      - description
+      - completed
+    properties:
+      id:
+        type: string
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+
+  ToDoPost:
+    type: object
+    required:
+      - title
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+        
+  ToDoPatch:
+    type: object
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+
+  ToDoUpdate:
+    type: object
+    required:
+      - title
+      - description
+      - completed
+    properties:
+      title:
+        type: string
+      description:
+        type: string
+      completed:
+        type: boolean
+       
+      
+
