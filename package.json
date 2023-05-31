@@ -30,6 +30,9 @@
     "packages/*"
   ],
   "dependencies": {
-    "supertest": "^6.3.3"
+    "@serverless-stack/resources": "^1.18.4",
+    "supertest": "^6.3.3",
+    "uuid": "^9.0.0",
+    "uuidv4": "^6.2.13"
   }
 }

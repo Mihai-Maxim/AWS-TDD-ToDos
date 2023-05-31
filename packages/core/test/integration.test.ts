@@ -2,16 +2,20 @@ import { expect, it, describe } from "vitest";
 import { Api } from "sst/node/api";
 import fetch, { Headers } from "node-fetch"
 
-const app_url = Api.api.url
+const app_url = Api.api.url + "/todos"
 
 const insertTodo = async (todo: any) => {
-    return fetch(app_url, {
+    const response = await fetch(app_url, {
         method: "POST",
         body: JSON.stringify(todo),
         headers: {
             "Content-Type": "application/json"
         }
     })
+
+    const body = await response.json()
+
+    return body
 }
 
 const getAllTodos = async () => {
@@ -37,7 +41,7 @@ const getToDoById = async (id: string): Promise<any> => {
 
     return body
 }
-          
+
 describe("POST /todos", () => {
 
     describe("given valid todo data", () => {
@@ -53,7 +57,7 @@ describe("POST /todos", () => {
 
 
         it("should post a todo", async () => {
-          
+
             const response = await fetch(app_url, {
                 method: "POST",
                 body: JSON.stringify(validToDoData),
@@ -70,13 +74,13 @@ describe("POST /todos", () => {
 
             delete body.id
 
-            expect(body).toEqual(validToDoData)
-          
+            expect(body).toEqual({...validToDoData, completed: false})
+
         });
 
 
         it("should post a todo with only the title", async () => {
-          
+
             const response = await fetch(app_url, {
                 method: "POST",
                 body: JSON.stringify(validToDoDataOnlyTitle),
@@ -97,7 +101,7 @@ describe("POST /todos", () => {
                 title: "Only title here",
                 completed: false
             })
-          
+
         });
     })
 
@@ -164,11 +168,9 @@ describe("GET /todos", () => {
 
             const body = await response.json() as any
 
-            expect(typeof body).toBe("array")
-
             expect(body.length).toBeGreaterThan(1)
 
-            const hasBothTodos = body.map((todo: any) => {
+            const hasBothTodos = body.filter((todo: any) => {
                return (todo.description === firstToDoToInsert.description && todo.title === firstToDoToInsert.title) ||
                       (todo.description === secondToDoToInsert.description && todo.title === secondToDoToInsert.title)
             })
@@ -218,7 +220,7 @@ describe("PUT /todos/:id", () => {
             }
 
             it("should update the todo with the new put data", async () => {
-                
+
                 const validToDo = await getValidToDoAt(1)
 
                 const validToDoId = validToDo.id
@@ -231,7 +233,7 @@ describe("PUT /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(200)
+                expect(response.status).toBe(200)
 
                 const body = await response.json() as any
 
@@ -276,7 +278,7 @@ describe("PUT /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(400)
+                expect(response.status).toBe(400)
 
             })
 
@@ -293,8 +295,8 @@ describe("PUT /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(400)
-                
+                expect(response.status).toBe(400)
+
             })
         })
     })
@@ -316,10 +318,10 @@ describe("PUT /todos/:id", () => {
                 }
             })
 
-            expect(response).toBe(404)
+            expect(response.status).toBe(404)
         })
     })
-    
+
 })
 
 describe("PATCH /todos/:id", () => {
@@ -350,7 +352,7 @@ describe("PATCH /todos/:id", () => {
             }
 
             it("should update the todo with the new patch data", async () => {
-                
+
                 const validToDo = await getValidToDoAt(0)
 
                 const validToDoId = validToDo.id
@@ -363,7 +365,7 @@ describe("PATCH /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(200)
+                expect(response.status).toBe(200)
 
                 const body = await response.json() as any
 
@@ -382,11 +384,11 @@ describe("PATCH /todos/:id", () => {
             })
 
             it("should update a todo with partial new patch data (only title)", async () => {
-                const validToDo = await getValidToDoAt(1)
+                const insertedToDo = await insertTodo(newToDoCompletedFalse) as any
 
-                const validToDoId = validToDo.id
+                const insertedToDoId = insertedToDo.id
 
-                const response = await fetch(`${app_url}/${validToDoId}`, {
+                const response = await fetch(`${app_url}/${insertedToDoId}`, {
                     method: "PATCH",
                     body: JSON.stringify(validToDoPatchDataOnlyTitle),
                     headers: {
@@ -394,15 +396,17 @@ describe("PATCH /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(200)
+
+                expect(response.status).toBe(200)
 
                 const body = await response.json() as any
 
                 expect(body.title).toBe(validToDoPatchDataOnlyTitle.title)
 
-                expect(body.title).not.toBe(validToDo.title)
 
-                expect(body.completed).toBe(validToDo.completed)
+                expect(body.title).not.toBe(insertedToDo.title)
+
+                expect(body.completed).toBe(insertedToDo.completed)
             })
 
             it("should update a todo with partial new patch data (only completed)", async () => {
@@ -418,12 +422,12 @@ describe("PATCH /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(200)
+                expect(response.status).toBe(200)
 
                 const body = await response.json() as any
 
                 expect(body.completed).toBe(validToDoPatchDataOnlyCompleted.completed)
-                
+
                 expect(body.title).toBe(insertedToDo.title)
 
                 expect(body.description).toBe(insertedToDo.description)
@@ -436,7 +440,7 @@ describe("PATCH /todos/:id", () => {
                 title: 1,
                 description: 2,
                 completed: "i don't know"
-            } 
+            }
 
             it("should return 400", async () => {
 
@@ -452,7 +456,7 @@ describe("PATCH /todos/:id", () => {
                     }
                 })
 
-                expect(response).toBe(400)
+                expect(response.status).toBe(400)
 
             })
         })
@@ -475,10 +479,10 @@ describe("PATCH /todos/:id", () => {
                 }
             })
 
-            expect(response).toBe(404)
+            expect(response.status).toBe(404)
         })
     })
-    
+
 })
 
 describe("DELETE /todos/:id", () => {
